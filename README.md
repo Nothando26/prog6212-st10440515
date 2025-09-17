@@ -1,5 +1,7 @@
 Contract Monthly Claim System (CMCS)
-GitHub Repository
+GitHub Repository 
+https://github.com/Nothando26/prog6212-st10440515.git
+
 
 About the Application
 
