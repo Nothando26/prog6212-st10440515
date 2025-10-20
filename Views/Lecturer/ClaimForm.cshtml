@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "Submit Claim";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script>
+        function calculateTotal() {
+            const hours = parseFloat(document.getElementById("hoursWorked").value) || 0;
+            const rate = parseFloat(document.getElementById("hourlyRate").value) || 0;
+            document.getElementById("totalAmount").value = (hours * rate).toFixed(2);
+        }
+        window.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("hoursWorked").addEventListener("input", calculateTotal);
+            document.getElementById("hourlyRate").addEventListener("input", calculateTotal);
+        });
+    </script>
+</head>
+<body class="claim-form-page">
+
+    <form asp-action="ClaimForm" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="hoursWorked">Hours Worked</label>
+            <input type="number" name="hoursWorked" id="hoursWorked" placeholder="Enter total hours" required />
+        </div>
+
+        <div class="form-group">
+            <label for="hourlyRate">Hourly Rate (R)</label>
+            <input type="number" name="hourlyRate" id="hourlyRate" value="@ViewBag.Lecturer.HourlyRate" required />
+        </div>
+
+        <div class="form-group">
+            <label for="totalAmount">Total Amount (R)</label>
+            <input type="number" id="totalAmount" readonly placeholder="Total will be calculated" />
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Additional Notes</label>
+            <textarea name="notes" id="notes" placeholder="Enter any notes"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="supportingDocs">Supporting Documents</label>
+            <input type="file" name="supportingDocs" id="supportingDocs" accept=".pdf,.doc,.docx" />
+            <small class="note">Upload PDF or DOC/DOCX files only</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Submit Claim</button>
+
+        
+    </form>
+</body>
+</html>
+

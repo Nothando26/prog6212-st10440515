@@ -1,0 +1,47 @@
+﻿@model List<prog6212_st10440515_poe.Models.Claim>
+@{
+    var lecturer = ViewBag.Lecturer;
+    ViewBag.Title = "Lecturer Dashboard";
+  
+}
+
+<div class="navbar">
+    <h2 class="logo">CMCS</h2>
+    <div class="nav-links">
+        <a href="@Url.Action("Index", "Home")">Home</a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <h1>Lecturer Dashboard</h1>
+
+    <div class="info-card">
+        <h2>Personal Details</h2>
+        <p><strong>Full Name:</strong> @lecturer.Name @lecturer.Surname</p>
+        <p><strong>Email:</strong> @lecturer.Email</p>
+        <p><strong>Hourly Rate:</strong> R@lecturer.HourlyRate</p>
+    </div>
+
+    <div class="info-card">
+        <h2>Claim Status</h2>
+        @if (Model.Count == 0)
+        {
+            <p>No claims submitted yet.</p>
+        }
+        else
+        {
+            foreach (var claim in Model)
+            {
+                <div class="claim-card">
+                    <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
+                    <p><strong>Total Amount:</strong> R@claim.Amount</p>
+                    <p><strong>Coordinator Review:</strong> @claim.CoordinatorReview</p>
+                    <p><strong>Manager Review:</strong> @claim.ManagerReview</p>
+                    <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "N/A" : $"<a href='{claim.SupportingDocumentPath}'>View File</a>")</p>
+                </div>
+            }
+        }
+
+        <a href="@Url.Action("ClaimForm", "Lecturer")" class="btn-primary small">Submit Claim</a>
+    </div>
+</div>

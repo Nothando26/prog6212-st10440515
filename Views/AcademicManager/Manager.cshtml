@@ -1,0 +1,36 @@
+﻿@model List<prog6212_st10440515_poe.Models.Claim>
+
+@{
+    ViewBag.Title = "Academic Manager Dashboard";
+  
+}
+
+<div class="navbar">
+    <h2 class="logo">CMCS</h2>
+    <div class="nav-links">
+        <a href="@Url.Action("Index", "Home")">Home</a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <h1>Academic Manager Dashboard</h1>
+
+    @foreach (var claim in Model)
+    {
+        <div class="lecturer-card">
+            <h2>Lecturer: @claim.Lecturer?.Name @claim.Lecturer>.Surname</h2>
+            <p><strong>Email:</strong> @claim.Lecturer?.Email</p>
+            <p><strong>Hourly Rate:</strong> R@claim.Lecturer.HourlyRate</p>
+            <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
+            <p><strong>Total:</strong> R@claim.Amount</p>
+            <p><strong>Claim Uploaded:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "No" : "Yes")</p>
+            <p><strong>Coordinator Review:</strong> @claim.CoordinatorReview</p>
+            <p><strong>Manager Review:</strong> @claim.ManagerReview</p>
+            <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "N/A" : $"<a href='{claim.SupportingDocumentPath}'>View File</a>")</p>
+
+            <div class="action-buttons">
+                <a href="@Url.Action("Review", "AcademicManager", new { claimId = claim.ClaimID })" class="btn-primary small">Review</a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "Sign Up - CMCS";
+   
+}
+
+<div class="signup-container">
+    <h1>Create Account</h1>
+
+    @if (ViewBag.Error != null)
+    {
+        <p class="error">@ViewBag.Error</p>
+    }
+    @if (ViewBag.Message != null)
+    {
+        <p class="success">@ViewBag.Message</p>
+    }
+
+    <form method="post" asp-action="Register">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" required />
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required />
+        </div>
+
+        <div class="form-group">
+            <label>Role / Position</label>
+            <select name="role" required>
+                <option value="">Select Role</option>
+                <option value="Lecturer">Lecturer</option>
+                <option value="Coordinator">Coordinator</option>
+                <option value="Manager">Manager</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">Sign Up</button>
+    </form>
+
+    <p>Already have an account? <a href="@Url.Action("Login", "Account")">Log In</a></p>
+</div>

@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "Login - CMCS";
+  
+}
+
+<div class="login-container">
+    <h1>Log In</h1>
+
+    @if (ViewBag.Error != null)
+    {
+        <p class="error">@ViewBag.Error</p>
+    }
+
+    <form method="post" asp-action="Login">
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" required />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required />
+        </div>
+
+        <button type="submit" class="btn-primary">Log In</button>
+    </form>
+
+    <p>Don't have an account? <a href="@Url.Action("SignUp", "Account")">Sign Up</a></p>
+</div>

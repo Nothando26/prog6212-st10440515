@@ -1,0 +1,20 @@
+﻿@model prog6212_st10440515_poe.Models.Claim
+
+<h1>Review Claim</h1>
+<div class="lecturer-card">
+    <h2>@Model.Lecturer.Name @Model.Lecturer.Surname</h2>
+    <p><strong>Email:</strong> @Model.Lecturer.Email</p>
+    <p><strong>Hours Worked:</strong> @Model.HoursWorked</p>
+    <p><strong>Hourly Rate:</strong> R@Model.Lecturer.HourlyRate</p>
+    <p><strong>Total Amount:</strong> R@Model.Amount</p>
+    <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(Model.SupportingDocumentPath) ? "N/A" : $"<a href='{Model.SupportingDocumentPath}'>View File</a>")</p>
+
+    <form method="post" asp-action="Review">
+        <input type="hidden" name="claimId" value="@Model.ClaimID" />
+        <button type="submit" name="actionType" value="Accept" class="btn-primary">Accept</button>
+        <button type="submit" name="actionType" value="Reject" class="btn-primary">Reject</button>
+        <button type="submit" name="actionType" value="Verify" class="btn-primary">Further Verification</button>
+    </form>
+
+    <a href="@Url.Action("Manager", "AcademicManager")">Back to dashboard</a>
+</div>

@@ -1,0 +1,40 @@
+﻿@model List<prog6212_st10440515_poe.Models.Claim>
+
+@{
+    ViewBag.Title = "Programme Coordinator Dashboard";
+   
+}
+
+<div class="navbar">
+    <h2 class="logo">CMCS</h2>
+    <div class="nav-links">
+        <a href="@Url.Action("Index", "Home")">Home</a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <h1>Programme Coordinator Dashboard</h1>
+    
+    @foreach (var claim in Model)
+    {
+        <div class="lecturer-card">
+            <h2>Lecturer: @claim.Lecturer?.Name @claim.Lecturer>.Surname</h2>
+            <p><strong>Email:</strong> @claim.Lecturer>.Email</p>
+            <p><strong>Hourly Rate:</strong> R@claim.Lecturer.HourlyRate</p>
+            <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
+            <p><strong>Total:</strong> R@claim.Amount</p>
+            <p><strong>Claim Uploaded:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "No" : "Yes")</p>
+            <p><strong>Coordinator Review:</strong> @claim.CoordinatorReview</p>
+            <p><strong>Manager Review:</strong> @claim.ManagerReview</p>
+            <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "N/A" : $"<a href='{claim.SupportingDocumentPath}'>View File</a>")</p>
+
+            <form method="post" asp-action="UpdateReview">
+                <input type="hidden" name="claimId" value="@claim.ClaimID" />
+                <button type="submit" name="actionType" value="Accept" class="btn-primary small">Accept</button>
+                <button type="submit" name="actionType" value="Reject" class="btn-primary small">Reject</button>
+                <button type="submit" name="actionType" value="Verify" class="btn-primary small">Further Verification</button>
+            </form>
+        </div>
+    }
+</div>
+

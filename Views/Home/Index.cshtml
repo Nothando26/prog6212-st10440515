@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "CMCS Home";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body class="home-page">
+
+    <!-- Header -->
+    <header class="navbar">
+        <h1 class="system-name">Contract Monthly Claim System (CMCS)</h1>
+        <nav class="nav-links">
+            <a href="@Url.Action("Login", "Account")">Login</a>
+           
+            
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h2>Welcome to the Contract Monthly Claim System</h2>
+        <p>Streamline your monthly claims with ease.</p>
+        <button class="btn-primary" onclick="location.href='@Url.Action("Login", "Account")'">Get Started</button>
+
+       
+        <img src="~/images/picture.PNG" alt="Illustration" class="hero-img" />
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Contact us: cmcs@IIEMSA.edu.za</p>
+        <p>© 2025 CMCS Website</p>
+    </footer>
+
+</body>
+</html>
