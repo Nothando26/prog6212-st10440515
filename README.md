@@ -1,70 +1,20 @@
 Contract Monthly Claim System (CMCS)
+
 GitHub Repository 
 https://github.com/Nothando26/prog6212-st10440515.git
+
+Youtube Link
+https://youtu.be/YX71XXjyyuo
 
 
 About the Application
 
-The Contract Monthly Claim System (CMCS) is a web-based application developed using ASP.NET MVC. It streamlines the process of lecturer claims by allowing lecturers to submit their worked hours with supporting documents, and enables coordinators and academic managers to review, approve, reject, or request further verification.
+The Claims Management and Coordination System (CMCS) is a web-based ASP.NET Core MVC application developed to simplify and automate the process of handling lecturer claims within an academic institution. The system allows lecturers to submit claims for hours worked, upload supporting documents, and track their claim status. Programme coordinators and academic managers are able to review, verify, and approve or reject these claims efficiently, ensuring that the entire process is transparent and well-documented.
 
-The system improves transparency, reduces manual paperwork, and ensures that claim processes are tracked efficiently.
+The application supports three main user roles — Lecturer, Programme Coordinator, and Academic Manager. Lecturers can submit claims by entering their hours worked and hourly rate, while also uploading a supporting document in PDF, DOCX, or XLSX format. Coordinators review the claims and can either accept, reject, or request further verification. Managers perform the final review and approval of each claim. Both the coordinator and manager have access to download and view the uploaded files.
 
-Features
+The system uses ASP.NET Core MVC for structure, Entity Framework Core for database interaction, and SQL Server for data storage. Session-based authentication ensures that only authorized users can access their respective dashboards. Error handling and input validation are included, particularly for file uploads, which have restrictions on both file type and size.
 
-Lecturer: Submit claims, upload supporting documents, and track claim status.
+A set of unit tests has been included to verify the functionality of key system components such as claim creation, amount calculation, role-based access, and dashboard rendering. These tests were written using xUnit and can be executed through Visual Studio’s Test Explorer.
 
-Coordinator: Review lecturer claims, approve/reject, or request further verification.
-
-Academic Manager: Perform final approval or rejection of claims, ensuring accountability.
-
-User Accounts: Secure login and registration for different roles.
-
-Status Tracking: Claim statuses are updated in real time with colored badges for visibility.
-
-User Guide
-Login & Registration
-
-New users must sign up with their details and select their role (Lecturer, Coordinator, Manager).
-
-Existing users can log in using their email and password.
-
-Lecturer Workflow
-
-Navigate to the Lecturer Dashboard.
-
-Click "Submit Claim," fill in hours worked, upload supporting documents, and submit.
-
-View claim history and statuses (Pending, Accepted, Rejected, Verification Needed).
-
-Coordinator Workflow
-
-Go to the Coordinator Dashboard.
-
-Review claims submitted by lecturers.
-
-Decide whether to Accept, Reject, or Mark for Further Verification.
-
-Academic Manager Workflow
-
-Open the Manager Dashboard.
-
-View all lecturer claims and supporting files.
-
-Perform the final review with Accept, Reject, or Further Verification options.
-
-User Manual
-
-For a more detailed guide, see the User Manual
-.
-
-Tools & Technologies
-
-ASP.NET MVC
-
-C#
-
-Entity Framework
-
-SQL Server (Database)
-
-HTML5, CSS3, Bootstrap (Frontend)
+To use the system, users must log in with their role credentials. Lecturers can create and submit new claims, coordinators can manage and review claims, and managers can perform final approvals. The system is designed to provide a reliable and efficient workflow for managing academic claims while maintaining data integrity and accountability.
