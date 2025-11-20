@@ -10,26 +10,33 @@
     <title>@ViewBag.Title</title>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
+
 <body class="home-page">
 
-    <!-- Header -->
+    <!-- Navbar -->
     <header class="navbar">
-        <h1 class="system-name">Contract Monthly Claim System (CMCS)</h1>
+        <div class="nav-left">
+            <h1 class="system-name">Contract Monthly Claim System</h1>
+        </div>
         <nav class="nav-links">
-            <a href="@Url.Action("Login", "Account")">Login</a>
-           
-            
+            <a href="@Url.Action("Login", "Account")" class="nav-btn">Login</a>
         </nav>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h2>Welcome to the Contract Monthly Claim System</h2>
-        <p>Streamline your monthly claims with ease.</p>
-        <button class="btn-primary" onclick="location.href='@Url.Action("Login", "Account")'">Get Started</button>
+        <div class="hero-content">
+            <h2>Welcome to the CMCS Portal</h2>
+            <p>Easily manage and submit your monthly lecturer claims.</p>
 
-       
-        <img src="~/images/picture.PNG" alt="Illustration" class="hero-img" />
+            <button class="btn-primary" onclick="location.href='@Url.Action("Login", "Account")'">
+                Get Started
+            </button>
+        </div>
+
+        <div class="hero-image-wrapper">
+            <img src="~/images/picture.PNG" alt="Illustration" class="hero-img" />
+        </div>
     </section>
 
     <!-- Footer -->

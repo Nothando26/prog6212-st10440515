@@ -1,58 +1,175 @@
-﻿@{
+﻿@model prog6212_st10440515_poe.Models.Lecturer
+
+@{
     ViewBag.Title = "Submit Claim";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="~/css/site.css" />
-    <script>
-        function calculateTotal() {
-            const hours = parseFloat(document.getElementById("hoursWorked").value) || 0;
-            const rate = parseFloat(document.getElementById("hourlyRate").value) || 0;
-            document.getElementById("totalAmount").value = (hours * rate).toFixed(2);
-        }
-        window.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("hoursWorked").addEventListener("input", calculateTotal);
-            document.getElementById("hourlyRate").addEventListener("input", calculateTotal);
-        });
-    </script>
-</head>
-<body class="claim-form-page">
+<div class="container claim-form-container">
+    <h1 class="page-title">Submit Claim</h1>
 
-    <form asp-action="ClaimForm" method="post" enctype="multipart/form-data">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form asp-action="ClaimForm" method="post" enctype="multipart/form-data" class="form-card">
+
+        <!-- Full Name (readonly) -->
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" value="@Model.FullName" readonly class="readonly-input" />
+        </div>
+
+        <!-- Email (readonly) -->
+        <div class="form-group">
+            <label>Email</label>
+            <input type="text" value="@Model.Email" readonly class="readonly-input" />
+        </div>
+
+        <!-- Hours Worked (editable) -->
         <div class="form-group">
             <label for="hoursWorked">Hours Worked</label>
-            <input type="number" name="hoursWorked" id="hoursWorked" placeholder="Enter total hours" required />
+            <input type="number" name="hoursWorked" id="hoursWorked" placeholder="Enter hours worked" min="0" max="180" required class="input-field" />
+            <small class="note">Maximum 180 hours per month.</small>
         </div>
 
+        <!-- Hourly Rate (readonly) -->
         <div class="form-group">
             <label for="hourlyRate">Hourly Rate (R)</label>
-            <input type="number" name="hourlyRate" id="hourlyRate" value="@ViewBag.Lecturer.HourlyRate" required />
+            <input type="number" id="hourlyRate" value="@Model.HourlyRate" readonly class="readonly-input" />
         </div>
 
+        <!-- Total Amount (autocalculated) -->
         <div class="form-group">
             <label for="totalAmount">Total Amount (R)</label>
-            <input type="number" id="totalAmount" readonly placeholder="Total will be calculated" />
+            <input type="text" id="totalAmount" readonly placeholder="Total will be calculated" class="readonly-input" />
         </div>
 
+        <!-- Additional Notes -->
         <div class="form-group">
             <label for="notes">Additional Notes</label>
-            <textarea name="notes" id="notes" placeholder="Enter any notes"></textarea>
+            <textarea name="notes" id="notes" placeholder="Enter any notes" class="textarea-field"></textarea>
         </div>
 
+        <!-- Supporting Documents -->
         <div class="form-group">
             <label for="supportingDocs">Supporting Documents</label>
-            <input type="file" name="supportingDocs" id="supportingDocs" accept=".pdf,.doc,.docx" />
-            <small class="note">Upload PDF or DOC/DOCX files only</small>
+            <input type="file" name="supportingDocs" id="supportingDocs" accept=".pdf,.docx,.xlsx" class="input-field" />
+            <small class="note">Upload PDF, DOCX, or XLSX files only (max 5 MB)</small>
         </div>
 
-        <button type="submit" class="btn-primary">Submit Claim</button>
-
-        
+        <button type="submit" class="btn btn-primary">Submit Claim</button>
     </form>
-</body>
-</html>
+</div>
+
+@section Scripts {
+    <script>
+        const hoursInput = document.getElementById("hoursWorked");
+        const rateInput = document.getElementById("hourlyRate");
+        const totalInput = document.getElementById("totalAmount");
+
+        function calculateTotal() {
+            let hours = parseFloat(hoursInput.value) || 0;
+            let rate = parseFloat(rateInput.value) || 0;
+            let total = hours * rate;
+            totalInput.value = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            if (hours > 180) {
+                alert("You cannot submit more than 180 hours per month!");
+                hoursInput.value = 180;
+                calculateTotal();
+            }
+        }
+
+        hoursInput.addEventListener("input", calculateTotal);
+        window.addEventListener("DOMContentLoaded", calculateTotal);
+    </script>
+}
+
+<style>
+    .claim-form-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-title {
+        text-align: center;
+        color: #2f3640;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-card .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.4rem;
+    }
+
+    .input-field, .readonly-input, .textarea-field {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+    }
+
+    .readonly-input {
+        background-color: #f1f2f6;
+        color: #333;
+    }
+
+    .textarea-field {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .note {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .btn-primary {
+        background-color: #27ae60;
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #219150;
+    }
+
+    .alert {
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .alert-error {
+        background-color: #e74c3c;
+        color: #fff;
+    }
+
+    .alert-success {
+        background-color: #27ae60;
+        color: #fff;
+    }
+</style>
 

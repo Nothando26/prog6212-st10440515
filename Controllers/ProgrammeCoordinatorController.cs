@@ -1,9 +1,8 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // <-- Needed for Include
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using prog6212_st10440515_poe.Data;
 using prog6212_st10440515_poe.Models;
+using System.Linq;
 
 namespace prog6212_st10440515_poe.Controllers
 {
@@ -16,48 +15,50 @@ namespace prog6212_st10440515_poe.Controllers
             _context = context;
         }
 
-        // GET: Coordinator dashboard
-        public IActionResult Coordinator()
+        public IActionResult CoordinatorDashboard()
         {
-            var coordinatorId = HttpContext.Session.GetInt32("UserID");
-            if (coordinatorId == null || HttpContext.Session.GetString("Role") != "Coordinator")
-                return RedirectToAction("Login", "Account");
+            var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            if (roleClaim != "Coordinator") return RedirectToAction("Login", "Account");
 
-            // Get all claims to review and include Lecturer to avoid null references
             var claims = _context.Claims
-                .Include(c => c.Lecturer) // <-- Eager load Lecturer
+                .Include(c => c.Lecturer)
                 .OrderByDescending(c => c.DateSubmitted)
                 .ToList();
 
             return View(claims);
         }
 
-        // POST: Update coordinator review
         [HttpPost]
         public IActionResult UpdateReview(int claimId, string actionType)
         {
-            var claim = _context.Claims
-                .Include(c => c.Lecturer) // Optional: include Lecturer if needed in processing
-                .FirstOrDefault(c => c.ClaimID == claimId);
+            var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            if (roleClaim != "Coordinator") return RedirectToAction("Login", "Account");
 
+            var claim = _context.Claims.FirstOrDefault(c => c.ClaimID == claimId);
             if (claim == null)
-                return RedirectToAction("Coordinator");
-
-            switch (actionType)
             {
-                case "Accept":
-                    claim.CoordinatorReview = "Accepted";
-                    break;
-                case "Reject":
-                    claim.CoordinatorReview = "Rejected";
-                    break;
-                case "Verify":
-                    claim.CoordinatorReview = "Further Verification";
-                    break;
+                TempData["Error"] = "Claim not found.";
+                return RedirectToAction("CoordinatorDashboard");
             }
 
+            if (!new[] { "Accept", "Reject", "Verify" }.Contains(actionType))
+            {
+                TempData["Error"] = "Invalid action.";
+                return RedirectToAction("CoordinatorDashboard");
+            }
+
+            claim.CoordinatorReview = actionType switch
+            {
+                "Accept" => "Accepted",
+                "Reject" => "Rejected",
+                "Verify" => "Further Verification",
+                _ => claim.CoordinatorReview
+            };
+
             _context.SaveChanges();
-            return RedirectToAction("Coordinator");
+            TempData["Success"] = $"Claim {actionType}ed successfully.";
+            return RedirectToAction("CoordinatorDashboard");
         }
     }
 }
+

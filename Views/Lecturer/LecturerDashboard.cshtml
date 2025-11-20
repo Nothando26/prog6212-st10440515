@@ -2,46 +2,82 @@
 @{
     var lecturer = ViewBag.Lecturer;
     ViewBag.Title = "Lecturer Dashboard";
-  
 }
 
-<div class="navbar">
-    <h2 class="logo">CMCS</h2>
-    <div class="nav-links">
-        <a href="@Url.Action("Index", "Home")">Home</a>
-    </div>
-</div>
+<div class="container dashboard-container">
 
-<div class="dashboard-container">
-    <h1>Lecturer Dashboard</h1>
+    <h1 class="page-title">Lecturer Dashboard</h1>
 
-    <div class="info-card">
-        <h2>Personal Details</h2>
-        <p><strong>Full Name:</strong> @lecturer.Name @lecturer.Surname</p>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- Personal Details Card -->
+    <div class="card info-card">
+        <h2>Your Details</h2>
+        <p><strong>Full Name:</strong> @lecturer.FullName</p>
         <p><strong>Email:</strong> @lecturer.Email</p>
-        <p><strong>Hourly Rate:</strong> R@lecturer.HourlyRate</p>
+        <p><strong>Hourly Rate:</strong> @lecturer.HourlyRate.ToString("C")</p>
     </div>
 
-    <div class="info-card">
-        <h2>Claim Status</h2>
-        @if (Model.Count == 0)
+    <!-- Claims List Card -->
+    <div class="card info-card">
+        <h2>Your Claims</h2>
+
+        @if (!Model.Any())
         {
             <p>No claims submitted yet.</p>
         }
         else
         {
-            foreach (var claim in Model)
-            {
-                <div class="claim-card">
-                    <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
-                    <p><strong>Total Amount:</strong> R@claim.Amount</p>
-                    <p><strong>Coordinator Review:</strong> @claim.CoordinatorReview</p>
-                    <p><strong>Manager Review:</strong> @claim.ManagerReview</p>
-                    <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "N/A" : $"<a href='{claim.SupportingDocumentPath}'>View File</a>")</p>
-                </div>
-            }
+            <table class="table claims-table">
+                <thead>
+                    <tr>
+                        <th>Hours</th>
+                        <th>Total</th>
+                        <th>Coordinator</th>
+                        <th>Manager</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Document</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var claim in Model)
+                    {
+                        <tr>
+                            <td>@claim.HoursWorked.ToString("N2")</td>
+                            <td>@claim.Amount.ToString("C")</td>
+                            <td>
+                                <span class="badge @(claim.CoordinatorReview.Replace(" ", ""))">@claim.CoordinatorReview</span>
+                            </td>
+                            <td>
+                                <span class="badge @(claim.ManagerReview.Replace(" ", ""))">@claim.ManagerReview</span>
+                            </td>
+                            <td>@claim.Status</td>
+                            <td>@claim.DateSubmitted.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(claim.SupportingDocumentPath))
+                                {
+                                    <a href="@Url.Content("~/" + claim.SupportingDocumentPath)" target="_blank">View</a>
+                                }
+                                else
+                                {
+                                    <span class="not-uploaded">No File</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
 
-        <a href="@Url.Action("ClaimForm", "Lecturer")" class="btn-primary small">Submit Claim</a>
+        <a href="@Url.Action("ClaimForm", "Lecturer")" class="btn btn-primary mt-3">Submit New Claim</a>
     </div>
 </div>
+

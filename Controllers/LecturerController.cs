@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using prog6212_st10440515_poe.Data;
 using prog6212_st10440515_poe.Models;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace prog6212_st10440515_poe.Controllers
 {
@@ -21,19 +20,22 @@ namespace prog6212_st10440515_poe.Controllers
         // GET: Lecturer Dashboard
         public IActionResult LecturerDashboard()
         {
-            var userId = HttpContext.Session.GetInt32("UserID");
-            var role = HttpContext.Session.GetString("Role");
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
 
-            if (userId == null || !string.Equals(role, "Lecturer", StringComparison.OrdinalIgnoreCase))
+            if (userIdClaim == null || roleClaim != "Lecturer")
                 return RedirectToAction("Login", "Account");
 
-            // Ensure Lecturer exists
-            var lecturer = _context.Lecturers.SingleOrDefault(l => l.UserID == userId);
+            var userId = int.Parse(userIdClaim);
+
+            var lecturer = _context.Lecturers
+                .Include(l => l.Claims)
+                .SingleOrDefault(l => l.UserID == userId);
+
             if (lecturer == null)
             {
                 var user = _context.Users.Find(userId);
-                if (user == null)
-                    return RedirectToAction("Login", "Account");
+                if (user == null) return RedirectToAction("Login", "Account");
 
                 lecturer = new Lecturer
                 {
@@ -41,88 +43,108 @@ namespace prog6212_st10440515_poe.Controllers
                     Name = user.FullName.Split(' ')[0],
                     Surname = string.Join(' ', user.FullName.Split(' ').Skip(1)),
                     Email = user.Email,
-                    HourlyRate = 0 // default
+                    HourlyRate = 0
                 };
+
                 _context.Lecturers.Add(lecturer);
                 _context.SaveChanges();
             }
 
-            // Load claims with Lecturer details
-            var claims = _context.Claims
-                .Where(c => c.LecturerID == lecturer.LecturerID)
-                .Include(c => c.Lecturer)
-                .OrderByDescending(c => c.DateSubmitted)
-                .ToList();
-
-            ViewBag.Lecturer = lecturer;
+            var claims = lecturer.Claims.OrderByDescending(c => c.DateSubmitted).ToList();
             return View(claims);
         }
 
         // GET: Claim Form
         public IActionResult ClaimForm()
         {
-            var userId = HttpContext.Session.GetInt32("UserID");
-            if (userId == null || HttpContext.Session.GetString("Role") != "Lecturer")
-                return RedirectToAction("Login", "Account");
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return RedirectToAction("Login", "Account");
 
+            var userId = int.Parse(userIdClaim);
             var lecturer = _context.Lecturers.SingleOrDefault(l => l.UserID == userId);
-            if (lecturer == null)
-                return RedirectToAction("LecturerDashboard");
+            if (lecturer == null) return RedirectToAction("LecturerDashboard");
 
-            ViewBag.Lecturer = lecturer;
-            return View();
+            return View(lecturer);
         }
 
         // POST: Submit Claim
         [HttpPost]
-        public IActionResult ClaimForm(double hoursWorked, double hourlyRate, string notes, IFormFile supportingDocs)
+        public IActionResult ClaimForm(double hoursWorked, string notes, IFormFile supportingDocs)
         {
-            var userId = HttpContext.Session.GetInt32("UserID");
-            if (userId == null || HttpContext.Session.GetString("Role") != "Lecturer")
-                return RedirectToAction("Login", "Account");
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return RedirectToAction("Login", "Account");
 
+            var userId = int.Parse(userIdClaim);
             var lecturer = _context.Lecturers.FirstOrDefault(l => l.UserID == userId);
+
             if (lecturer == null)
             {
-                ViewBag.Error = "Lecturer record not found. Please contact admin.";
-                return RedirectToAction("Login", "Account");
+                TempData["Error"] = "Lecturer not found.";
+                return RedirectToAction("LecturerDashboard");
             }
 
-            string docPath = null;
-            if (supportingDocs != null && supportingDocs.Length > 0)
+            // Check monthly hour limit
+            var currentMonthHours = _context.Claims
+                .Where(c => c.LecturerID == lecturer.LecturerID &&
+                            c.DateSubmitted.Month == DateTime.Now.Month &&
+                            c.DateSubmitted.Year == DateTime.Now.Year)
+                .Sum(c => c.HoursWorked);
+
+            if (currentMonthHours + hoursWorked > 180)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = $"{Guid.NewGuid()}_{supportingDocs.FileName}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    supportingDocs.CopyTo(stream);
-                }
-                docPath = $"/uploads/{fileName}";
+                TempData["Error"] = "You cannot submit more than 180 hours this month.";
+                return RedirectToAction("ClaimForm");
             }
 
-            var totalAmount = hoursWorked * hourlyRate; // auto calculate
+            // Handle document
+            string docPath = null;
+            if (supportingDocs != null)
+            {
+                var allowedExtensions = new[] { ".pdf", ".docx", ".xlsx" };
+                var ext = Path.GetExtension(supportingDocs.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(ext))
+                {
+                    TempData["Error"] = "Only PDF, DOCX, or XLSX files allowed.";
+                    return RedirectToAction("ClaimForm");
+                }
+
+                if (supportingDocs.Length > 5 * 1024 * 1024)
+                {
+                    TempData["Error"] = "File size exceeds 5 MB limit.";
+                    return RedirectToAction("ClaimForm");
+                }
+
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploads)) Directory.CreateDirectory(uploads);
+
+                docPath = Path.Combine("uploads", Guid.NewGuid() + "_" + supportingDocs.FileName);
+                var fullPath = Path.Combine("wwwroot", docPath);
+
+                using var stream = new FileStream(fullPath, FileMode.Create);
+                supportingDocs.CopyTo(stream);
+            }
 
             var claim = new Claim
             {
-                LecturerID = lecturer.LecturerID, // FK is safe now
+                LecturerID = lecturer.LecturerID,
                 HoursWorked = hoursWorked,
-                Amount = totalAmount,
-                SupportingDocumentPath = docPath,
-                Status = "Pending",
+                Amount = hoursWorked * lecturer.HourlyRate,
+                DateSubmitted = DateTime.Now,
                 Description = notes,
+                SupportingDocumentPath = docPath,
+                SupportingDocumentName = supportingDocs?.FileName,
                 CoordinatorReview = "Pending",
                 ManagerReview = "Pending",
-                DateSubmitted = DateTime.Now
+                Status = "Pending"
             };
 
             _context.Claims.Add(claim);
             _context.SaveChanges();
 
+            TempData["Success"] = "Claim submitted successfully!";
             return RedirectToAction("LecturerDashboard");
         }
     }
 }
+

@@ -2,35 +2,219 @@
 
 @{
     ViewBag.Title = "Academic Manager Dashboard";
-  
 }
 
-<div class="navbar">
-    <h2 class="logo">CMCS</h2>
-    <div class="nav-links">
-        <a href="@Url.Action("Index", "Home")">Home</a>
-    </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            margin: 0;
+        }
 
-<div class="dashboard-container">
-    <h1>Academic Manager Dashboard</h1>
+        .navbar {
+            background-color: #2f3640;
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    @foreach (var claim in Model)
-    {
-        <div class="lecturer-card">
-            <h2>Lecturer: @claim.Lecturer?.Name @claim.Lecturer>.Surname</h2>
-            <p><strong>Email:</strong> @claim.Lecturer?.Email</p>
-            <p><strong>Hourly Rate:</strong> R@claim.Lecturer.HourlyRate</p>
-            <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
-            <p><strong>Total:</strong> R@claim.Amount</p>
-            <p><strong>Claim Uploaded:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "No" : "Yes")</p>
-            <p><strong>Coordinator Review:</strong> @claim.CoordinatorReview</p>
-            <p><strong>Manager Review:</strong> @claim.ManagerReview</p>
-            <p><strong>Supporting Docs:</strong> @(string.IsNullOrEmpty(claim.SupportingDocumentPath) ? "N/A" : $"<a href='{claim.SupportingDocumentPath}'>View File</a>")</p>
+            .navbar .logo {
+                font-size: 1.8rem;
+                font-weight: bold;
+            }
 
-            <div class="action-buttons">
-                <a href="@Url.Action("Review", "AcademicManager", new { claimId = claim.ClaimID })" class="btn-primary small">Review</a>
-            </div>
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 1rem;
+            font-weight: 500;
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #2f3640;
+            margin-bottom: 2rem;
+        }
+
+        .lecturer-card {
+            background-color: #fff;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s;
+        }
+
+            .lecturer-card:hover {
+                transform: scale(1.02);
+            }
+
+            .lecturer-card p {
+                margin: 0.3rem 0;
+            }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+            .badge.Pending {
+                background-color: #f39c12;
+            }
+
+            .badge.Accepted {
+                background-color: #27ae60;
+            }
+
+            .badge.Rejected {
+                background-color: #c0392b;
+            }
+
+            .badge.FurtherVerification {
+                background-color: #2980b9;
+            }
+
+        .btn {
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+            transition: background-color 0.2s;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+        }
+
+            .btn-success:hover {
+                background-color: #219150;
+            }
+
+        .btn-danger {
+            background-color: #c0392b;
+        }
+
+            .btn-danger:hover {
+                background-color: #992d22;
+            }
+
+        .btn-warning {
+            background-color: #f39c12;
+        }
+
+            .btn-warning:hover {
+                background-color: #d68910;
+            }
+
+        .card-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+            .card-section p {
+                font-size: 0.95rem;
+            }
+
+        .form-review {
+            margin-top: 1rem;
+        }
+
+        a.download-link {
+            color: #2980b9;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            a.download-link:hover {
+                text-decoration: underline;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2 class="logo">CMCS</h2>
+        <div class="nav-links">
+            <a href="@Url.Action("Index", "Home")">Home</a>
         </div>
-    }
-</div>
+    </div>
+
+    <div class="dashboard-container">
+        <h1>Academic Manager Dashboard</h1>
+
+        @if (!Model.Any())
+        {
+            <p>No claims to review at the moment.</p>
+        }
+
+        @foreach (var claim in Model)
+        {
+            <div class="lecturer-card">
+                <div class="card-section">
+                    <p><strong>Lecturer:</strong> @claim.Lecturer?.Name @claim.Lecturer?.Surname</p>
+                    <p><strong>Email:</strong> @claim.Lecturer?.Email</p>
+                    <p><strong>Hours Worked:</strong> @claim.HoursWorked</p>
+                    <p><strong>Hourly Rate:</strong> @(claim.Lecturer?.HourlyRate.ToString("C") ?? "N/A")</p>
+                    <p><strong>Total Amount:</strong> @(claim.Amount.ToString("C"))</p>
+                </div>
+
+                <div class="card-section">
+                    <p>
+                        <strong>Coordinator Review:</strong>
+                        <span class="badge @(claim.CoordinatorReview.Replace(" ", ""))">@claim.CoordinatorReview</span>
+                    </p>
+                    <p>
+                        <strong>Manager Review:</strong>
+                        <span class="badge @(claim.ManagerReview.Replace(" ", ""))">@claim.ManagerReview</span>
+                    </p>
+                    <p>
+                        <strong>Supporting Docs:</strong>
+                        @if (!string.IsNullOrEmpty(claim.SupportingDocumentPath))
+                        {
+                            <a href="@Url.Content("~/" + claim.SupportingDocumentPath)" class="download-link" download>Download</a>
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </p>
+                </div>
+
+                @* Show review buttons only for Managers *@
+                @if (User.IsInRole("Manager"))
+                {
+                    <div class="form-review">
+                        <form method="post" asp-action="UpdateReview" asp-controller="AcademicManager">
+                            <input type="hidden" name="claimId" value="@claim.ClaimID" />
+                            <button type="submit" name="actionType" value="Accept" class="btn btn-success">Accept</button>
+                            <button type="submit" name="actionType" value="Reject" class="btn btn-danger">Reject</button>
+                            <button type="submit" name="actionType" value="Verify" class="btn btn-warning">Further Verification</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</body>
+</html>
+

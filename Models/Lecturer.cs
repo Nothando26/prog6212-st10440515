@@ -1,6 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Claims;
 
 namespace prog6212_st10440515_poe.Models
 {
@@ -10,7 +10,7 @@ namespace prog6212_st10440515_poe.Models
         public int LecturerID { get; set; }
 
         [Required]
-        public int UserID { get; set; } // FK to User
+        public int UserID { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -24,39 +24,13 @@ namespace prog6212_st10440515_poe.Models
         [Required]
         public double HourlyRate { get; set; }
 
-        // Navigation property for claims
-        // NEW: navigation property
+        public double MaxHoursPerMonth { get; set; } = 180;
+
+        [NotMapped]
+        public string FullName => $"{Name} {Surname}";
+
         public ICollection<Claim> Claims { get; set; } = new List<Claim>();
     }
 
-        public class Claim
-        {
-            [Key]
-            public int ClaimID { get; set; }
-
-        [Required]
-        public int LecturerID { get; set; }
-
-        [ForeignKey("LecturerID")]
-        public Lecturer Lecturer { get; set; }
-
-        [Required]
-            public double HoursWorked { get; set; }
-
-            [Required]
-            public double Amount { get; set; }
-
-            public string SupportingDocumentPath { get; set; }
-
-            public string Status { get; set; } = "Pending"; // General claim status
-
-            public string CoordinatorReview { get; set; } = "Pending"; // Pending, Accepted, Rejected
-            public string ManagerReview { get; set; } = "Pending"; // Pending, Accepted, Rejected, Verification
-
-            public string Description { get; set; } // Additional notes
-
-            public DateTime DateSubmitted { get; set; } = DateTime.Now;
-
-         
-        }
-    }
+}
+ 
